@@ -75,6 +75,7 @@ public class LexerNode {
                 result.append(action.getKey().toString());
                 result.append(action.getValue().toString());
             }
+            result.append(" ) ");
         }
         return result.toString();
     }
@@ -100,7 +101,9 @@ public class LexerNode {
                     ongoingParsingArgs.append(token);
                     ongoingParsingArgs.append(",");
                 }
-                ongoingParsingArgs.deleteCharAt(ongoingParsingArgs.length()-1);
+                if(ongoingParsing.size()>0){
+                    ongoingParsingArgs.deleteCharAt(ongoingParsingArgs.length()-1);
+                }
                 result.append("return parseError(" + ongoingParsingArgs + ");\n");
             }
         }
@@ -109,7 +112,7 @@ public class LexerNode {
 
     private String toJavaSingleCharRules(){
         StringBuffer result = new StringBuffer();
-        result.append("switch(currentChar){");
+        result.append("switch(currentChar){\n");
         for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
             RuleChar rule = (RuleChar) action.getKey();
             result.append("case '" + rule.expectedChar() + "':\n");
@@ -124,7 +127,12 @@ public class LexerNode {
         StringBuffer result = new StringBuffer();
         for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
             if (all || !(action.getKey() instanceof RuleChar)){
-                result.append(action.getKey().javaMatch(action.getValue().toJava()));
+                result.append(
+                        action.getKey().javaMatch(
+                                "\n" + action.getKey().javaAction() + "\n" +
+                                action.getValue().toJava()
+                                )
+                        );
             }
         }
         return result.toString();

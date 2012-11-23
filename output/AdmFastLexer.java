@@ -37,16 +37,21 @@ public class AdmFastLexer {
 currentChar = readNextChar();
 if (currentChar=='o'){
 currentChar = readNextChar();
+
 switch(currentChar){case 'o':
 currentChar = readNextChar();
 if (currentChar=='l'){
 currentChar = readNextChar();
+
 if (currentChar=='e'){
 currentChar = readNextChar();
+
 if (currentChar=='a'){
 currentChar = readNextChar();
+
 if (currentChar=='n'){
 currentChar = readNextChar();
+
 return TOKEN_BOOLEAN_LIT;
 }
 return parseError(TOKEN_BOOLEAN_LIT);
@@ -60,6 +65,7 @@ case 'm':
 currentChar = readNextChar();
 if (currentChar=='b'){
 currentChar = readNextChar();
+
 return TOKEN_BOMB_LIT;
 }
 return parseError(TOKEN_BOMB_LIT);
@@ -67,10 +73,13 @@ case 'n':
 currentChar = readNextChar();
 if (currentChar=='s'){
 currentChar = readNextChar();
+
 if (currentChar=='a'){
 currentChar = readNextChar();
+
 if (currentChar=='i'){
 currentChar = readNextChar();
+
 return TOKEN_BONSAI_LIT;
 }
 return parseError(TOKEN_BONSAI_LIT);
@@ -85,12 +94,16 @@ case 'f':
 currentChar = readNextChar();
 if (currentChar=='a'){
 currentChar = readNextChar();
+
 if (currentChar=='l'){
 currentChar = readNextChar();
+
 if (currentChar=='s'){
 currentChar = readNextChar();
+
 if (currentChar=='e'){
 currentChar = readNextChar();
+
 return TOKEN_FALSE_LIT;
 }
 return parseError(TOKEN_FALSE_LIT);
@@ -104,12 +117,16 @@ case 'h':
 currentChar = readNextChar();
 if (currentChar=='e'){
 currentChar = readNextChar();
+
 if (currentChar=='l'){
 currentChar = readNextChar();
+
 if (currentChar=='l'){
 currentChar = readNextChar();
+
 if (currentChar=='o'){
 currentChar = readNextChar();
+
 return TOKEN_HELLO_LIT;
 }
 return parseError(TOKEN_HELLO_LIT);

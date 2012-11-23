@@ -32,7 +32,7 @@ public class LexerGenerator {
             String input  = readFile(inputDir + file);
             String output = replaceParams(input, config);
             file = file.replace("Lexer", config.get("LEXER_NAME"));
-            System.out.print("\t>\t" + file);
+            System.out.print("\t>>\t" + file);
             FileWriter out = new FileWriter(outputDir+file);
             out.write(output);
             out.close();

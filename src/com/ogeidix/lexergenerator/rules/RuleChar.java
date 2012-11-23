@@ -9,6 +9,7 @@ public class RuleChar implements Rule {
         this.expected = expected;
     }
 
+    @Override
     public String toString(){
         return String.valueOf(expected);
     }
@@ -44,7 +45,6 @@ public class RuleChar implements Rule {
         result.append("if (currentChar=='");
         result.append(expected);
         result.append("'){\n");
-        result.append(this.javaAction());
         result.append(action);
         result.append("}\n");
         return result.toString();
