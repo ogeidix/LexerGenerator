@@ -36,7 +36,7 @@ public class RuleChar implements Rule {
 
     @Override
     public String javaAction() {
-        return "currentChar = readNextChar();\n";
+        return "currentChar = readNextChar();";
     }
 
     @Override
@@ -44,9 +44,9 @@ public class RuleChar implements Rule {
         StringBuilder result = new StringBuilder();
         result.append("if (currentChar=='");
         result.append(expected);
-        result.append("'){\n");
+        result.append("'){");
         result.append(action);
-        result.append("}\n");
+        result.append("}");
         return result.toString();
     }
 

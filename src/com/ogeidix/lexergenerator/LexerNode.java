@@ -116,10 +116,10 @@ public class LexerNode {
         for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
             RuleChar rule = (RuleChar) action.getKey();
             result.append("case '" + rule.expectedChar() + "':\n");
-            result.append(rule.javaAction());
+            result.append(rule.javaAction()).append("\n");
             result.append(action.getValue().toJava());
         }
-        result.append("}");
+        result.append("}\n");
         return result.toString();        
     }
     

@@ -43,7 +43,7 @@ public class LexerNodeAdd {
                 "case 'c':" +
                 "\n" + ruleABC_action +
                 "\n" + token_return   +
-                "}"+ token_parseerror , node.toJava());
+                "}\n"+ token_parseerror , node.toJava());
     }
 
 }
