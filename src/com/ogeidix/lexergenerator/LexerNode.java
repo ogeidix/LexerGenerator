@@ -40,6 +40,16 @@ public class LexerNode {
         }
     }
 
+    public void append(LexerNode node) throws Exception {
+        if (actions.size() == 0) {
+            merge(node);
+        } else {
+            for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
+                action.getValue().append(node);
+            }
+        }
+    }
+    
     public void merge(LexerNode newNode) throws Exception {
         for (Map.Entry<Rule, LexerNode> action : newNode.actions.entrySet()) {
             if (this.actions.get(action.getKey()) == null) {
@@ -127,12 +137,11 @@ public class LexerNode {
         StringBuffer result = new StringBuffer();
         for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
             if (all || !(action.getKey() instanceof RuleChar)){
+                String act = action.getKey().javaAction();
+                if(act.length()>0){act = "\n" + act;}
                 result.append(
-                        action.getKey().javaMatch(
-                                "\n" + action.getKey().javaAction() + "\n" +
-                                action.getValue().toJava()
-                                )
-                        );
+                  action.getKey().javaMatch( act + "\n" + action.getValue().toJava() )
+                );
             }
         }
         return result.toString();

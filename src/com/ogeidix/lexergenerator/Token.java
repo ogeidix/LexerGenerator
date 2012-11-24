@@ -11,6 +11,7 @@ public class Token {
     
     public Token(String str) throws Exception {
         userDescription = str;
+        node = new LexerNode();
         parse(userDescription);
     }
     
@@ -31,14 +32,20 @@ public class Token {
         Matcher m = p.matcher(str);
         if (!m.find()) throw new Exception("Token definition not correct");
         this.name = m.group(1);
-        String[] textRules = m.group(2).split(",\\s*");
+        String[] textRules = m.group(2).split("(?<!\\\\),\\s*");
         for (String textRule : textRules) {
-            Pattern pRule = Pattern.compile("^(\\w+)(\\((\\w+)\\))?");
+            Pattern pRule = Pattern.compile("^(\\w+)(\\((.*)\\))?");
             Matcher mRule = pRule.matcher(textRule);
             mRule.find();
-            node = NodeChainFactory.create(mRule.group(1), mRule.group(3));
-            node.appendTokenName(name);
+            String generator = mRule.group(1);
+            String constructor =  mRule.group(3);
+            if (constructor == null)
+                throw new Exception("Error in rule format: " +
+                		"\n " + str + " : " + generator + " = " + constructor);
+            constructor = constructor.replace("\\", "");
+            node.append(NodeChainFactory.create(generator, constructor));
         }
+        node.appendTokenName(name);
     }
 
 }
