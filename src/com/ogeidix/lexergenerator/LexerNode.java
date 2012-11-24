@@ -74,7 +74,7 @@ public class LexerNode {
             if (this.finalTokenName == null){
                 this.finalTokenName = newNode.finalTokenName;
             } else {
-                throw new Exception("Rule conflict");
+                throw new Exception("Rule conflict between: " + this.finalTokenName+ " and " + newNode.finalTokenName);
             }
         }
         for(String ongoing : newNode.ongoingParsing){

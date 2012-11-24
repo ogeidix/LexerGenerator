@@ -1,22 +1,20 @@
 package com.ogeidix.lexergenerator;
 
 import java.util.HashMap;
-import com.ogeidix.lexergenerator.rulegenerators.RuleGenerator;
-import com.ogeidix.lexergenerator.rulegenerators.RuleGeneratorChar;
-import com.ogeidix.lexergenerator.rulegenerators.RuleGeneratorDigitSequence;
-import com.ogeidix.lexergenerator.rulegenerators.RuleGeneratorString;
-import com.ogeidix.lexergenerator.rulegenerators.RuleGeneratorAnythingUntil;
-import com.ogeidix.lexergenerator.rulegenerators.RuleGeneratorSignOrNothing;
+import com.ogeidix.lexergenerator.rulegenerators.*;
 
 public class NodeChainFactory {
     static private HashMap<String, RuleGenerator> ruleGenerators = new HashMap<String, RuleGenerator>();
 
     static {
-        ruleGenerators.put("char",          new RuleGeneratorChar());
-        ruleGenerators.put("string",        new RuleGeneratorString());
-        ruleGenerators.put("anythingUntil", new RuleGeneratorAnythingUntil());
-        ruleGenerators.put("signOrNothing", new RuleGeneratorSignOrNothing());
+        ruleGenerators.put("char",                new RuleGeneratorChar());
+        ruleGenerators.put("string",              new RuleGeneratorString());
+        ruleGenerators.put("anythingUntil",       new RuleGeneratorAnythingUntil());
+        ruleGenerators.put("signOrNothing",       new RuleGeneratorSignOrNothing());
+        ruleGenerators.put("sign",                new RuleGeneratorSign());
         ruleGenerators.put("digitSequence",       new RuleGeneratorDigitSequence());
+        ruleGenerators.put("caseInsensitiveChar", new RuleGeneratorCaseInsensitiveChar());
+        ruleGenerators.put("charOrNothing",       new RuleGeneratorCharOrNothing());
     }
 
     public static LexerNode create(String generator, String constructor) throws Exception{
