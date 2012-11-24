@@ -13,6 +13,18 @@ public class LexerNode {
     private String finalTokenName;
     private Set<String> ongoingParsing = new HashSet<String>();
 
+    public LexerNode clone(){
+        LexerNode node = new LexerNode();
+        node.finalTokenName = this.finalTokenName;
+        for (Map.Entry<Rule, LexerNode> entry : this.actions.entrySet()) {
+            node.actions.put(entry.getKey().clone(), entry.getValue().clone());
+        }
+        for (String ongoing : this.ongoingParsing) {
+            node.ongoingParsing.add(ongoing);
+        }
+        return node;
+    }
+    
     public void appendTokenName(String name) {
         if (actions.size() == 0) {
             this.finalTokenName = name;
@@ -45,7 +57,7 @@ public class LexerNode {
             merge(node);
         } else {
             for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
-                action.getValue().append(node);
+                action.getValue().append(node.clone());
             }
         }
     }
@@ -124,10 +136,12 @@ public class LexerNode {
         StringBuffer result = new StringBuffer();
         result.append("switch(currentChar){\n");
         for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
-            RuleChar rule = (RuleChar) action.getKey();
-            result.append("case '" + rule.expectedChar() + "':\n");
-            result.append(rule.javaAction()).append("\n");
-            result.append(action.getValue().toJava());
+            if (action.getKey() instanceof RuleChar){
+                RuleChar rule = (RuleChar) action.getKey();
+                result.append("case '" + rule.expectedChar() + "':\n");
+                result.append(rule.javaAction()).append("\n");
+                result.append(action.getValue().toJava());
+            }
         }
         result.append("}\n");
         return result.toString();        

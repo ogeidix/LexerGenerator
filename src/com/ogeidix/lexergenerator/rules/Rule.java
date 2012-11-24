@@ -7,4 +7,5 @@ public interface Rule {
     
     public String javaAction();
     public String javaMatch(String action);
+    public Rule   clone();
 }

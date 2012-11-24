@@ -5,6 +5,10 @@ public class RuleAnythingUntil implements Rule {
     
     private char expected;
     
+    public RuleAnythingUntil clone(){
+        return new RuleAnythingUntil(expected);
+    }
+    
     public RuleAnythingUntil(char expected){
         this.expected = expected;
     }

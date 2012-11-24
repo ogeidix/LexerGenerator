@@ -5,6 +5,10 @@ public class RuleChar implements Rule {
     
     private char expected;
     
+    public RuleChar clone(){
+        return new RuleChar(expected);
+    }
+    
     public RuleChar(char expected){
         this.expected = expected;
     }

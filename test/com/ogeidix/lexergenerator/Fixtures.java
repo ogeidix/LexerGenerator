@@ -18,7 +18,11 @@ public class Fixtures {
     static  String rule2_match      = "matchCheck2("+rule_name+")";
     
     static Rule rule = new Rule(){
-
+        
+        public Rule clone(){
+            return null;
+        }
+        
         @Override
         public String javaAction() {
             return rule_action;
@@ -38,6 +42,10 @@ public class Fixtures {
 
     static Rule rule2 = new Rule(){
 
+        public Rule clone(){
+            return null;
+        }
+        
         @Override
         public String javaAction() {
             return rule2_action;
