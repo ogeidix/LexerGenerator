@@ -59,7 +59,7 @@ public class LexerNodeMerge {
         try {
             node.merge(node2);
         } catch (Exception e) {
-            assertEquals("Rule conflict", e.getMessage());
+            assertEquals("Rule conflict between: "+token_name +" and "+token2_name, e.getMessage());
             throw e;
         }
     }

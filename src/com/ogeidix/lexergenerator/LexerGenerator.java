@@ -5,17 +5,22 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
 public class LexerGenerator {
-    private List<Token> tokens = new ArrayList<Token>();
+    private LinkedHashMap<String,Token> tokens = new LinkedHashMap<String, Token>();
     
-    public boolean addToken(String rule) throws Exception{
-        return tokens.add(new Token(rule));
+    public void addToken(String rule) throws Exception{
+        Token newToken = new Token(rule, tokens);
+        Token existingToken = tokens.get(newToken.getName());
+        if(existingToken==null){
+            tokens.put(newToken.getName(), newToken);
+        }else{
+            existingToken.merge(newToken);
+        }
     }
 
     public void generateLexer(HashMap<String,String> config) throws Exception{
@@ -42,7 +47,7 @@ public class LexerGenerator {
 
     public String printParsedGrammar() {
         StringBuilder result = new StringBuilder();
-        for(Token token : tokens){
+        for(Token token : tokens.values()){
             result.append(token.toString()).append("\n");
         }
         return result.toString();
@@ -70,7 +75,7 @@ public class LexerGenerator {
     
     private HashSet<String> uniqueTokens() {
         HashSet<String> uniqueTokens = new HashSet<String>();
-        for(Token token : tokens){
+        for(Token token : tokens.values()){
             uniqueTokens.add(token.getName());
         }
         return uniqueTokens;
@@ -78,8 +83,10 @@ public class LexerGenerator {
 
     private String lexerLogic() throws Exception {
         LexerNode main = new LexerNode();
-        for(Token token : tokens){
-            main.merge(token.getNode());
+        for(Token token : tokens.values()){
+            if(token.getName().charAt(0)!='@'){
+                main.merge(token.getNode());
+            }
         }
         return main.toJava();
     }

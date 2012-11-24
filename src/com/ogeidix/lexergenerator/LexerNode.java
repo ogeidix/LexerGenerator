@@ -36,6 +36,14 @@ public class LexerNode {
         }
     }
 
+    public void removeTokensName() {
+        this.finalTokenName = null;
+        this.ongoingParsing.clear();
+        for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
+            action.getValue().removeTokensName();
+        }
+    }
+    
     public void add(Rule newRule) {
         if (actions.get(newRule) == null) {
             actions.put(newRule, new LexerNode());

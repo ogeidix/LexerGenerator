@@ -1,5 +1,6 @@
 package com.ogeidix.lexergenerator;
 
+import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,10 +10,10 @@ public class Token {
     private String name;
     private LexerNode node;
     
-    public Token(String str) throws Exception {
+    public Token(String str, LinkedHashMap<String, Token> tokens) throws Exception {
         userDescription = str;
         node = new LexerNode();
-        parse(userDescription);
+        parse(userDescription, tokens);
     }
     
     public String getName() {
@@ -27,8 +28,8 @@ public class Token {
         return this.name + " => " + getNode().toString();
     }
     
-    private void parse(String str) throws Exception{
-        Pattern p = Pattern.compile("^(\\w+)\\s*=\\s*(.+)");
+    private void parse(String str, LinkedHashMap<String, Token> tokens) throws Exception{
+        Pattern p = Pattern.compile("^(@?\\w+)\\s*=\\s*(.+)");
         Matcher m = p.matcher(str);
         if (!m.find()) throw new Exception("Token definition not correct");
         this.name = m.group(1);
@@ -43,9 +44,13 @@ public class Token {
                 throw new Exception("Error in rule format: " +
                 		"\n " + str + " : " + generator + " = " + constructor);
             constructor = constructor.replace("\\", "");
-            node.append(NodeChainFactory.create(generator, constructor));
+            node.append(NodeChainFactory.create(generator, constructor, tokens));
         }
         node.appendTokenName(name);
+    }
+
+    public void merge(Token newToken) throws Exception {
+        node.merge(newToken.getNode());
     }
 
 }
