@@ -6,15 +6,20 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
+import java.util.Set;
 
 public class LexerGenerator {
     private LinkedHashMap<String,Token> tokens = new LinkedHashMap<String, Token>();
     
     public void addToken(String rule) throws Exception{
-        Token newToken = new Token(rule, tokens);
+        Token newToken;
+        if(rule.charAt(0)=='@'){
+            newToken = new TokenAux(rule, tokens);
+        } else {
+            newToken = new Token(rule, tokens);
+        }
         Token existingToken = tokens.get(newToken.getName());
         if(existingToken==null){
             tokens.put(newToken.getName(), newToken);
@@ -24,9 +29,11 @@ public class LexerGenerator {
     }
 
     public void generateLexer(HashMap<String,String> config) throws Exception{
-        config.put("TOKENS_CONSTANTS", this.tokensConstants());
-        config.put("TOKENS_IMAGES",    this.tokensImages());
-        config.put("LEXER_LOGIC",      this.lexerLogic());
+        LexerNode main = this.compile();
+        config.put("TOKENS_CONSTANTS",   this.tokensConstants());
+        config.put("TOKENS_IMAGES",      this.tokensImages());
+        config.put("LEXER_LOGIC",        main.toJava());
+        config.put("LEXER_AUXFUNCTIONS", replaceParams(this.auxiliaryFunctions(main),config));
         String[] files   = {"Lexer.java", "LexerException.java"};
         String inputDir  = config.get("INPUT_DIR");
         String outputDir = config.get("OUTPUT_DIR");
@@ -53,10 +60,28 @@ public class LexerGenerator {
         return result.toString();
     }
 
+    private LexerNode compile() throws Exception {
+        LexerNode main = new LexerNode();
+        for(Token token : tokens.values()){
+            if(token instanceof TokenAux) continue;
+            main.merge(token.getNode());
+        }
+        return main;
+    }
+
+    private String tokensImages() {
+        StringBuilder   result   = new StringBuilder();
+        Set<String> uniqueTokens = tokens.keySet();
+        for(String token : uniqueTokens){
+            result.append(", \"<").append(token).append(">\" ");
+        }
+        return result.toString();
+    }
+
     private String tokensConstants() {
-        StringBuilder   result = new StringBuilder();
-        HashSet<String> uniqueTokens = uniqueTokens();
-        int i=1;
+        StringBuilder result       = new StringBuilder();
+        Set<String>   uniqueTokens = tokens.keySet();
+        int i=2;
         for(String token : uniqueTokens){
             result.append(", TOKEN_").append(token).append("=").append(i).append(" ");
             i++;
@@ -64,31 +89,15 @@ public class LexerGenerator {
         return result.toString();
     }
 
-    private String tokensImages() {
-        StringBuilder   result = new StringBuilder();
-        HashSet<String> uniqueTokens = uniqueTokens();
-        for(String token : uniqueTokens){
-            result.append(", \"<").append(token).append(">\" ");
+    private String auxiliaryFunctions(LexerNode main) {
+        StringBuilder result    = new StringBuilder();
+        Set<String>   functions = main.neededAuxFunctions();
+        for(String token : functions){
+            result.append("private int parse_"+token+"(char currentChar) throws IOException, [LEXER_NAME]Exception{\n");
+            result.append(tokens.get(token).getNode().toJavaAuxFunction());
+            result.append("\n}\n\n");
         }
         return result.toString();
-    }
-    
-    private HashSet<String> uniqueTokens() {
-        HashSet<String> uniqueTokens = new HashSet<String>();
-        for(Token token : tokens.values()){
-            uniqueTokens.add(token.getName());
-        }
-        return uniqueTokens;
-    }
-
-    private String lexerLogic() throws Exception {
-        LexerNode main = new LexerNode();
-        for(Token token : tokens.values()){
-            if(token.getName().charAt(0)!='@'){
-                main.merge(token.getNode());
-            }
-        }
-        return main.toJava();
     }
 
     private static String readFile(String fileName) throws FileNotFoundException, IOException {
@@ -115,8 +124,7 @@ public class LexerGenerator {
     }
  
     
-    public static void main(String args[]) throws Exception{        
-        
+    public static void main(String args[]) throws Exception{                
         if (args.length == 0 || args[0] == "--help" || args[0] == "-h"){
             System.out.println("LexerGenerator\nusage: java LexerGenerator <configuration file>");
             return;
@@ -129,6 +137,7 @@ public class LexerGenerator {
         String input = readFile(args[0]);
         boolean tokens = false;
         for(String line : input.split("\r?\n")){
+            line = line.trim();
             if (line.length() == 0 || line.charAt(0)=='#') continue;
             if(tokens == false && !line.equals("TOKENS:")){
                 config.put(line.split("\\s*:\\s*")[0], line.split("\\s*:\\s*")[1]);
@@ -138,9 +147,10 @@ public class LexerGenerator {
                 lexer.addToken(line);
             }
         }
+
         String parsedGrammar = lexer.printParsedGrammar();
         lexer.generateLexer(config);
-        System.out.println("Generated grammar:");
+        System.out.println("\nGenerated grammar:");
         System.out.println(parsedGrammar);
     }
     

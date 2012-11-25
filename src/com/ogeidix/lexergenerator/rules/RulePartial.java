@@ -1,37 +1,37 @@
 package com.ogeidix.lexergenerator.rules;
 
 
-public class RuleChar implements Rule {
+public class RulePartial implements Rule {
     
-    private char expected;
+    private String partialName;
     
-    public RuleChar clone(){
-        return new RuleChar(expected);
+    public RulePartial clone(){
+        return new RulePartial(partialName);
     }
     
-    public RuleChar(char expected){
-        this.expected = expected;
+    public RulePartial(String expected){
+        this.partialName = expected;
     }
 
-    @Override
-    public String toString(){
-        return String.valueOf(expected);
+    public String getPartial(){
+        return this.partialName;
     }
     
-    public char expectedChar(){
-        return expected;
+    @Override
+    public String toString(){
+        return partialName;
     }
 
     @Override
     public int hashCode() {
-        return (int) expected;
+        return (int) partialName.charAt(1);
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null) return false;
-        if (o instanceof RuleChar){
-            if (((RuleChar) o).expected == this.expected){
+        if (o instanceof RulePartial){
+            if (((RulePartial) o).partialName.equals(this.partialName)){
                 return true;
             }
         }
@@ -46,11 +46,10 @@ public class RuleChar implements Rule {
     @Override
     public String javaMatch(String action) {
         StringBuilder result = new StringBuilder();
-        result.append("if (currentChar=='");
-        result.append(expected);
-        result.append("'){");
+        result.append("if (parse_"+partialName+"(currentChar)==TOKEN_"+partialName+"){");
         result.append(action);
         result.append("}");
         return result.toString();
     }
+    
 }

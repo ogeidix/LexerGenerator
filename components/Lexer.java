@@ -6,10 +6,10 @@ import com.ogeidix.lexer.[LEXER_NAME]Exception;
 public class [LEXER_NAME] {
 
     public static final int
-        TOKEN_EOF = 0 [TOKENS_CONSTANTS];
+        TOKEN_EOF = 0, TOKEN_AUX_NOT_FOUND = 1 [TOKENS_CONSTANTS];
 
     private static final String[] tokenImage = {
-            "<EOF>" [TOKENS_IMAGES]
+            "<EOF>", "<AUX_NOT_FOUND>" [TOKENS_IMAGES]
           };
     
     private static final char EOF_CHAR = 4;
@@ -26,6 +26,8 @@ public class [LEXER_NAME] {
     protected int endOf_UNUSED_Buffer;
     protected int maxUnusedBufferSize;
     
+    [LEXER_AUXFUNCTIONS]
+
     public int next() throws [LEXER_NAME]Exception, IOException{
         char currentChar = buffer[bufpos];
         while (currentChar == ' ' || currentChar=='\t' || currentChar == '\n' || currentChar=='\r')

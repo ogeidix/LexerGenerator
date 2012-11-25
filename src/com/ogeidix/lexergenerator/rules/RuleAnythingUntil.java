@@ -44,8 +44,11 @@ public class RuleAnythingUntil implements Rule {
         StringBuilder result = new StringBuilder();
         result.append("boolean escaped = false;");
         result.append("while (currentChar!='").append(expected).append("' || escaped)");
-        result.append("{\nif(!escaped && currentChar=='\'){escaped=true;}\nelse {escaped=false;})\ncurrentChar = readNextChar();\n}");
-        result.append("{").append(action).append("}");
+        result.append("{\nif(!escaped && currentChar=='\\\\\\\\'){escaped=true;}\nelse {escaped=false;}\ncurrentChar = readNextChar();\n}");
+        result.append("\nif (currentChar=='").append(expected).append("'{");
+        result.append(action);
+        result.append("}\n");
         return result.toString();
     }
+
 }

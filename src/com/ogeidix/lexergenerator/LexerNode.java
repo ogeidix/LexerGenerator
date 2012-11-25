@@ -1,5 +1,6 @@
 package com.ogeidix.lexergenerator;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -25,25 +26,6 @@ public class LexerNode {
         return node;
     }
     
-    public void appendTokenName(String name) {
-        if (actions.size() == 0) {
-            this.finalTokenName = name;
-        } else {
-            ongoingParsing.add(TOKEN_PREFIX + name);
-            for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
-                action.getValue().appendTokenName(name);
-            }
-        }
-    }
-
-    public void removeTokensName() {
-        this.finalTokenName = null;
-        this.ongoingParsing.clear();
-        for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
-            action.getValue().removeTokensName();
-        }
-    }
-    
     public void add(Rule newRule) {
         if (actions.get(newRule) == null) {
             actions.put(newRule, new LexerNode());
@@ -60,16 +42,6 @@ public class LexerNode {
         }
     }
 
-    public void append(LexerNode node) throws Exception {
-        if (actions.size() == 0) {
-            merge(node);
-        } else {
-            for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
-                action.getValue().append(node.clone());
-            }
-        }
-    }
-    
     public void merge(LexerNode newNode) throws Exception {
         for (Map.Entry<Rule, LexerNode> action : newNode.actions.entrySet()) {
             if (this.actions.get(action.getKey()) == null) {
@@ -90,6 +62,41 @@ public class LexerNode {
         }
     }
 
+    public void append(LexerNode node) throws Exception {
+        if (actions.size() == 0) {
+            merge(node);
+        } else {
+            for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
+                if(action.getKey() instanceof RuleEpsilon) continue; 
+                action.getValue().append(node.clone());
+            }
+            if(actions.containsKey(new RuleEpsilon())){
+                actions.remove(new RuleEpsilon());
+                merge(node);
+            }
+        }
+    }
+
+    public void appendTokenName(String name) {
+        if (actions.size() == 0) {
+            this.finalTokenName = name;
+        } else {
+            ongoingParsing.add(TOKEN_PREFIX + name);
+            for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
+                action.getValue().appendTokenName(name);
+            }
+        }
+    }
+
+    public LexerNode removeTokensName() {
+        this.finalTokenName = null;
+        this.ongoingParsing.clear();
+        for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
+            action.getValue().removeTokensName();
+        }
+        return this;
+    }
+    
     public String toString() {
         StringBuilder result = new StringBuilder();
         if (finalTokenName!=null)
@@ -112,11 +119,7 @@ public class LexerNode {
 
     public String toJava() {
         StringBuffer result = new StringBuffer();
-        int singleCharRules = 0;
-        for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
-            if (action.getKey() instanceof RuleChar) singleCharRules++;
-        }
-        if (singleCharRules>2){
+        if (numberOfRuleChar() > 2){
             result.append(toJavaSingleCharRules());
             result.append(toJavaComplexRules(false));            
         } else {
@@ -124,20 +127,19 @@ public class LexerNode {
         }
         if (this.finalTokenName != null) {
             result.append("return " + TOKEN_PREFIX + finalTokenName + ";\n");
-        } else {
-            if (ongoingParsing != null){
-                StringBuilder ongoingParsingArgs = new StringBuilder();
-                for (String token : ongoingParsing){
-                    ongoingParsingArgs.append(token);
-                    ongoingParsingArgs.append(",");
-                }
-                if(ongoingParsing.size()>0){
-                    ongoingParsingArgs.deleteCharAt(ongoingParsingArgs.length()-1);
-                }
-                result.append("return parseError(" + ongoingParsingArgs + ");\n");
-            }
+        } else if (ongoingParsing != null){
+            String ongoingParsingArgs = collectionJoin(ongoingParsing, ',');
+            result.append("return parseError(" + ongoingParsingArgs + ");\n");
         }
         return result.toString();
+    }
+
+    private int numberOfRuleChar() {
+        int singleCharRules = 0;
+        for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
+            if (action.getKey() instanceof RuleChar) singleCharRules++;
+        }
+        return singleCharRules;
     }
 
     private String toJavaSingleCharRules(){
@@ -158,16 +160,60 @@ public class LexerNode {
     private String toJavaComplexRules(boolean all){
         StringBuffer result = new StringBuffer();
         for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
-            if (all || !(action.getKey() instanceof RuleChar)){
-                String act = action.getKey().javaAction();
-                if(act.length()>0){act = "\n" + act;}
-                result.append(
-                  action.getKey().javaMatch( act + "\n" + action.getValue().toJava() )
-                );
-            }
+            if (!all && action.getKey() instanceof RuleChar) continue;
+            if (action.getKey() instanceof RuleEpsilon)      continue;
+            String act = action.getKey().javaAction();
+            if(act.length()>0) { act = "\n" + act; }
+            result.append(action.getKey().javaMatch( act + "\n" + action.getValue().toJava()));
         }
         return result.toString();
     }
+
+    public void expandFirstAction(LinkedHashMap<String, Token> tokens) throws Exception {
+        if(actions.size()==1){
+            Rule first = (Rule) actions.keySet().toArray()[0];
+            if (first instanceof RulePartial){
+                    if (tokens.get(((RulePartial)first).getPartial()) == null){
+                        throw new Exception("Cannot find a token used as part of another definition," +
+                        		            "missing token: " + ((RulePartial)first).getPartial());
+                    }
+                    actions.remove(first);
+                    LexerNode node = tokens.get(((RulePartial)first).getPartial()).getNode().clone().removeTokensName();
+                    merge(node);
+            }
+        }
+    }
     
-    
+    public Set<String> neededAuxFunctions(){
+        HashSet<String> partials = new HashSet<String>();
+        for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
+            Rule rule = action.getKey();
+            if(rule instanceof RulePartial){
+                partials.add(((RulePartial)rule).getPartial());
+            }
+            partials.addAll(action.getValue().neededAuxFunctions());
+        }
+        return partials;
+    }
+
+    public String toJavaAuxFunction() {
+        String oldFinalTokenName = finalTokenName;
+        if(oldFinalTokenName == null)
+            finalTokenName = "AUX_NOT_FOUND";
+        String result =  toJava();
+        finalTokenName = oldFinalTokenName;
+        return result;
+    }
+
+    private String collectionJoin(Collection<String> collection, char c) {
+        StringBuilder ongoingParsingArgs = new StringBuilder();
+        for (String token : collection){
+            ongoingParsingArgs.append(token);
+            ongoingParsingArgs.append(c);
+        }
+        if(ongoingParsing.size()>0){
+            ongoingParsingArgs.deleteCharAt(ongoingParsingArgs.length()-1);
+        }
+        return ongoingParsingArgs.toString();
+    }
 }

@@ -1,15 +1,15 @@
 package com.ogeidix.lexergenerator.rules;
 
 
-public class RuleNextRule implements Rule {
+public class RuleEpsilon implements Rule {
 
-    public RuleNextRule clone(){
-        return new RuleNextRule();
+    public RuleEpsilon clone(){
+        return new RuleEpsilon();
     }
     
     @Override
     public String toString(){
-        return "";
+        return "Û";
     }
 
     @Override
@@ -20,7 +20,7 @@ public class RuleNextRule implements Rule {
     @Override
     public boolean equals(Object o) {
         if (o == null) return false;
-        if (o instanceof RuleNextRule){
+        if (o instanceof RuleEpsilon){
                 return true;
         }
         return false;
@@ -37,5 +37,4 @@ public class RuleNextRule implements Rule {
         result.append("{").append(action).append("}");
         return result.toString();
     }
-
 }

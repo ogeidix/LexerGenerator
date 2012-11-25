@@ -1,18 +1,15 @@
 package com.ogeidix.lexergenerator.rulegenerators;
 
-import java.util.LinkedHashMap;
-
 import com.ogeidix.lexergenerator.LexerNode;
-import com.ogeidix.lexergenerator.Token;
+import com.ogeidix.lexergenerator.rules.RulePartial;
 
 public class RuleGeneratorToken implements RuleGenerator {
 
     @Override
-    public LexerNode generate(String input, LinkedHashMap<String, Token> tokens) throws Exception {
-        Token existingToken = tokens.get(input);
-        if (existingToken==null) throw new Exception("Rule generator token, cannot find previous token: " + input);
-        LexerNode node = existingToken.getNode().clone();
-        node.removeTokensName();
+    public LexerNode generate(String input) throws Exception {
+        if (input==null || input.length() == 0) throw new Exception("Wrong rule format for generator token : " + input);
+        LexerNode node =  new LexerNode();
+        node.add(new RulePartial(input));
         return node;
     }
 
