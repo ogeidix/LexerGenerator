@@ -67,17 +67,17 @@ public class LexerNode {
     }
 
     public void append(LexerNode node) throws Exception {
-        if (actions.size() == 0) {
+        for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
+            if(action.getKey() instanceof RuleEpsilon) continue; 
+            action.getValue().append(node);
+        }
+        if(actions.containsKey(new RuleEpsilon())){
+            actions.remove(new RuleEpsilon());
             merge(node.clone());
-        } else {
-            for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
-                if(action.getKey() instanceof RuleEpsilon) continue; 
-                action.getValue().append(node);
-            }
-            if(actions.containsKey(new RuleEpsilon())){
-                actions.remove(new RuleEpsilon());
-                merge(node.clone());
-            }
+        }
+        if(actions.size()==0 || finalTokenName!=null){
+            finalTokenName=null;
+            merge(node.clone());
         }
     }
 
@@ -182,7 +182,7 @@ public class LexerNode {
                         		            "missing token: " + ((RulePartial)first).getPartial());
                     }
                     actions.remove(first);
-                    LexerNode node = tokens.get(((RulePartial)first).getPartial()).getNode().clone().removeTokensName();
+                    LexerNode node = tokens.get(((RulePartial)first).getPartial()).getNode().clone();
                     merge(node);
             }
         }
