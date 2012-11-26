@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class LexerNodeAdd {
+public class LexerNodeAddRule {
 
     @Test
     public void NodeRuleRuleNodeNode() {

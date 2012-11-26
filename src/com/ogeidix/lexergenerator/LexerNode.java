@@ -9,7 +9,7 @@ import java.util.Set;
 import com.ogeidix.lexergenerator.rules.*;
 
 public class LexerNode {
-    private static final String TOKEN_PREFIX = "TOKEN_";
+    private static String TOKEN_PREFIX = "TOKEN_";
     private LinkedHashMap<Rule, LexerNode> actions = new LinkedHashMap<Rule, LexerNode>();
     private String finalTokenName;
     private Set<String> ongoingParsing = new HashSet<String>();
@@ -39,6 +39,10 @@ public class LexerNode {
             for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
                 action.getValue().append(newRule);
             }
+            if(actions.containsKey(new RuleEpsilon())){
+                actions.remove(new RuleEpsilon());
+                add(newRule);
+            }
         }
     }
 
@@ -64,15 +68,15 @@ public class LexerNode {
 
     public void append(LexerNode node) throws Exception {
         if (actions.size() == 0) {
-            merge(node);
+            merge(node.clone());
         } else {
             for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
                 if(action.getKey() instanceof RuleEpsilon) continue; 
-                action.getValue().append(node.clone());
+                action.getValue().append(node);
             }
             if(actions.containsKey(new RuleEpsilon())){
                 actions.remove(new RuleEpsilon());
-                merge(node);
+                merge(node.clone());
             }
         }
     }
@@ -170,11 +174,11 @@ public class LexerNode {
     }
 
     public void expandFirstAction(LinkedHashMap<String, Token> tokens) throws Exception {
-        if(actions.size()==1){
-            Rule first = (Rule) actions.keySet().toArray()[0];
+        for (Map.Entry<Rule, LexerNode> action : actions.entrySet()) {
+            Rule first = action.getKey();
             if (first instanceof RulePartial){
                     if (tokens.get(((RulePartial)first).getPartial()) == null){
-                        throw new Exception("Cannot find a token used as part of another definition," +
+                        throw new Exception("Cannot find a token used as part of another definition, " +
                         		            "missing token: " + ((RulePartial)first).getPartial());
                     }
                     actions.remove(first);

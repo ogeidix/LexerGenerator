@@ -17,6 +17,35 @@ public class Fixtures {
     static  String rule2_name       = "myrule2";
     static  String rule2_match      = "matchCheck2("+rule_name+")";
     
+    static public Rule createRule(final String name){
+        return new Rule(){
+            String rule_name        = name;
+            String rule_action      = "myaction";
+            String rule_match       = "matchCheck("+rule_name+")";
+            
+            @Override
+            public Rule clone(){
+                return Fixtures.createRule(name+"_clone");
+            }
+            
+            @Override
+            public String javaAction() {
+                return rule_action;
+            }
+
+            @Override
+            public String javaMatch(String action) {
+                return rule_match+"{"+action+"}";
+            }
+            
+            @Override
+            public String toString(){
+                return rule_name;
+            }
+            
+        }; 
+    }
+    
     static Rule rule = new Rule(){
         
         public Rule clone(){

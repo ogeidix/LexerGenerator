@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import static com.ogeidix.lexergenerator.Fixtures.*;
 
-public class LexerNodeAppend {    
+public class LexerNodeAppendRule {    
     @Test
     public void SingleNode() {
         LexerNode node = new LexerNode();

@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class LexerNodeMerge {
+public class LexerNodeMergeNode {
 
     @Test
     public void MergeIsAdd() throws Exception {
@@ -63,5 +63,19 @@ public class LexerNodeMerge {
             throw e;
         }
     }
-    
+
+    @Test
+    public void MergeWithoutConflictWithRemoveTokensName() throws Exception {
+        LexerNode node = new LexerNode();
+        node.append(rule);
+        node.append(rule);
+        node.appendTokenName(token_name);
+        LexerNode node2 = new LexerNode();
+        node2.append(rule);
+        node2.append(rule);
+        node2.appendTokenName(token2_name);
+        node2.removeTokensName();
+        node.merge(node2);
+        assertEquals(rule_name+rule_name+token_tostring, node.toString());
+    }
 }
