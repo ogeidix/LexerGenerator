@@ -40,7 +40,7 @@ public class RulePartial implements Rule {
 
     @Override
     public String javaAction() {
-        return "currentChar = readNextChar();";
+        return "";
     }
 
     @Override

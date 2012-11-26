@@ -28,7 +28,7 @@ public class RuleDigitSequence implements Rule {
 
     @Override
     public String javaAction() {
-        return "currentChar = readNextChar();";
+        return "";
     }
 
     @Override

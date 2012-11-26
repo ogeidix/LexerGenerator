@@ -1,7 +1,7 @@
 package [PACKAGE]; 
 
 import java.io.IOException;
-import com.ogeidix.lexer.[LEXER_NAME]Exception;
+import [PACKAGE].[LEXER_NAME]Exception;
 
 public class [LEXER_NAME] {
 
@@ -91,14 +91,14 @@ public class [LEXER_NAME] {
         throw new [LEXER_NAME]Exception(message.toString());
     }
 
-    protected int parseError(int ... tokens) throws AdmFastLexerException {
+    protected int parseError(int ... tokens) throws [LEXER_NAME]Exception {
         StringBuilder message = new StringBuilder();
         message.append("Error while parsing. ");
         message.append(" Line: ").append(line);
         message.append(" Row: ").append(column);
         message.append(" Expecting:");
         for (int tokenId : tokens){
-            message.append(" ").append(AdmFastLexer.tokenKindToString(tokenId));
+            message.append(" ").append([LEXER_NAME].tokenKindToString(tokenId));
         }
         throw new [LEXER_NAME]Exception(message.toString());
     }
