@@ -8,6 +8,9 @@ public class [LEXER_NAME] {
     public static final int
         TOKEN_EOF = 0, TOKEN_AUX_NOT_FOUND = 1 [TOKENS_CONSTANTS];
 
+    // Human representation of tokens. Useful for debug.
+    // Is possible to convert a TOKEN_CONSTANT in its image through
+    // [LEXER_NAME].tokenKindToString(TOKEN_CONSTANT); 
     private static final String[] tokenImage = {
             "<EOF>", "<AUX_NOT_FOUND>" [TOKENS_IMAGES]
           };
@@ -25,9 +28,17 @@ public class [LEXER_NAME] {
     protected int endOf_USED_Buffer;
     protected int endOf_UNUSED_Buffer;
     protected int maxUnusedBufferSize;
-    
+
+// ================================================================================
+//  Auxiliary functions. Can parse the tokens used in the grammar as partial/auxiliary
+// ================================================================================
+
     [LEXER_AUXFUNCTIONS]
 
+// ================================================================================
+//  Main method. Return a TOKEN_CONSTANT
+// ================================================================================            
+            
     public int next() throws [LEXER_NAME]Exception, IOException{
         char currentChar = buffer[bufpos];
         while (currentChar == ' ' || currentChar=='\t' || currentChar == '\n' || currentChar=='\r')
@@ -132,7 +143,7 @@ public class [LEXER_NAME] {
     }
     
 // ================================================================================
-//  Read data buffer management
+//  Read data, buffer management. It uses a circular (and expandable) buffer
 // ================================================================================    
 
     protected char readNextChar() throws IOException {
